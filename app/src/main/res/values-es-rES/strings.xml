@@ -6,4 +6,5 @@
     <string name="grafico">Gráfico</string>
     <string name="maps">Mapa</string>
     <string name="load">Actualizar</string>
+    <string name="near">Cercano</string>
 </resources>

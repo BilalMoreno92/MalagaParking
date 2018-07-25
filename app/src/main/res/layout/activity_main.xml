@@ -43,21 +43,24 @@
 
     <Button
         android:id="@+id/btGrafico"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
         android:onClick="onClick"
         android:text="@string/grafico"
         app:layout_constraintBottom_toBottomOf="@+id/btMaps"
         app:layout_constraintEnd_toStartOf="@+id/btMaps"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btMaps" />
 
     <Button
         android:id="@+id/btMaps"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:onClick="onClick"
         android:text="@string/maps"
@@ -69,8 +72,10 @@
 
     <Button
         android:id="@+id/btLoad"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="8dp"
         android:onClick="onClick"
         android:text="@string/load"
         app:layout_constraintBottom_toBottomOf="@+id/btMaps"
