@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Malaga Parking</string>
+    <string name="malaga_parking">Málaga Parking</string>
+    <string name="grafico">Graphic</string>
+    <string name="maps">Maps</string>
+    <string name="load">Update</string>
+    <string name="desc_foto_portada">Nocturne Málaga\'s photo.</string>
 </resources>

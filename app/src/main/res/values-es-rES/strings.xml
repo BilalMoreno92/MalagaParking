@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Malaga Parking</string>
+    <string name="malaga_parking">Málaga Parking</string>
+    <string name="desc_foto_portada">Foto nocturna de Málaga.</string>
+    <string name="grafico">Gráfico</string>
+    <string name="maps">Mapa</string>
+    <string name="load">Actualizar</string>
+</resources>
