@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,51 +24,60 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
-    private ListView listaParkings;
-    private ArrayList<Parking> list_parking;
-    private GoogleMap map;
+    //Permissions request codes
     private final int  MAPS_PERMISSIONS = 20;
+
+    //Views
+    private ListView listaParkings;
+    private GoogleMap map;
+
+
+    //Util
+    private ArrayList<Parking> list_parking;
     private Location deviceLocation;
-    private
-    LocationManager locationManager;
-    LocationListener locationListener;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
+        //Get parkings list
         Intent intent = getIntent();
         list_parking = (ArrayList<Parking>) intent.getExtras().get("listaParkings");
 
+        //Show parkings list
         listaParkings = findViewById(R.id.lvParkings);
-
         ParkingAdapter adapter = new ParkingAdapter(getApplicationContext(), R.layout.parking_item, list_parking);
         listaParkings.setAdapter(adapter);
         listaParkings.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) { //Set marker on parking click
                 setMarker((Parking) parent.getItemAtPosition(position));
             }
         });
 
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(this, "Sin permisos", Toast.LENGTH_SHORT).show();
+        //Get location
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new DeviceLocationListener();
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION }, MAPS_PERMISSIONS);
         } else {
-            Toast.makeText(this, "Permisos concedidos", Toast.LENGTH_SHORT).show();
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
         }
+        deviceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
-    private void setMarker(Parking parking){
+    private void setMarker(Parking parking){ //Set a parking marker on the map
         map.clear();
         LatLng marker = new LatLng(parking.getLatitude(), parking.getLongitude());
         int zoom = 16;
@@ -79,21 +89,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case MAPS_PERMISSIONS:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permisos concedidos",
-                            Toast.LENGTH_LONG).show();
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permisos concedidos", Toast.LENGTH_LONG).show();
 
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        findViewById(R.id.btNear).setVisibility(View.GONE);
                         return;
                     }
-                    locationManager.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-                } else
-                    Toast.makeText(this,
-                            "SIN permisos", Toast.LENGTH_LONG).show();
-
-        }
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+                } else {
+                    Toast.makeText(this, "SIN permisos", Toast.LENGTH_LONG).show();
+                }
         }
     }
 
@@ -105,9 +111,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onClick(View v){
         switch (v.getId()){
             case R.id.btNear:
-                Location greenRay = new Location("Green Ray");
-                greenRay.setLatitude(36.71853911463124);
-                greenRay.setLongitude(-4.496980905532837);
                 Parking masCercano = list_parking.get(0);
                 Location locationParking = new Location("ParkingActual");
                 Location locationCercano = new Location("MasCercano");
@@ -117,12 +120,35 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         list_parking) {
                     locationParking.setLatitude(parking.getLatitude());
                     locationParking.setLongitude(parking.getLongitude());
-                    if (greenRay.distanceTo(locationParking) < greenRay.distanceTo(locationCercano)){
+                    if (deviceLocation.distanceTo(locationParking) < deviceLocation.distanceTo(locationCercano)){
                         masCercano = parking;
                     }
                 }
                 setMarker(masCercano);
                 break;
+        }
+    }
+
+    private class DeviceLocationListener implements LocationListener{
+
+        @Override
+        public void onLocationChanged(Location location) {
+            deviceLocation = location;
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
         }
     }
 }
