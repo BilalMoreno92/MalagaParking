@@ -5,9 +5,8 @@ import java.util.Date;
 
 public class Parking implements Serializable{
     private int _id, _capacidad, _libres;
-    private String _nombre, _direccion;
+    private String _nombre, _direccion, _fechaAct;;
     private double _latitude, _longitude;
-    private String _fechaAct;
 
     public Parking(int _id, String _nombre, String _direccion, double _latitude, double _longitude) {
         this._id = _id;
@@ -17,7 +16,7 @@ public class Parking implements Serializable{
         this._longitude = _longitude;
     }
 
-    public Parking(int _id, int _capacidad, int _libres, String _nombre, String _direccion, double _latitude, double _longitude, String  _fechaAct) {
+    public Parking(int _id, String _nombre, String _direccion, double _latitude, double _longitude, int _capacidad, int _libres, String  _fechaAct) {
         this._id = _id;
         this._capacidad = _capacidad;
         this._libres = _libres;
@@ -87,5 +86,19 @@ public class Parking implements Serializable{
 
     public String getFechaAct() {
         return _fechaAct;
+    }
+
+    @Override
+    public String toString() {
+        return "Parking{" +
+                "_id=" + _id +
+                ", _capacidad=" + _capacidad +
+                ", _libres=" + _libres +
+                ", _nombre='" + _nombre + '\'' +
+                ", _direccion='" + _direccion + '\'' +
+                ", _fechaAct='" + _fechaAct + '\'' +
+                ", _latitude=" + _latitude +
+                ", _longitude=" + _longitude +
+                '}';
     }
 }

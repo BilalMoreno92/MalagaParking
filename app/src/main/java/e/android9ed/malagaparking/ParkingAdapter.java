@@ -1,11 +1,14 @@
 package e.android9ed.malagaparking;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.google.android.gms.common.api.Response;
 
 import java.util.ArrayList;
 
@@ -55,10 +58,23 @@ public class ParkingAdapter extends BaseAdapter {
         libres = view.findViewById(R.id.txtLibres);
 
         parking = datos.get(position);
+        Integer freeParks = parking.getLibres();
 
         id.setText(Integer.toString(parking.getId()));
         nombre.setText(parking.getNombre());
         libres.setText(Integer.toString(parking.getLibres()));
+
+        if (freeParks == 0){
+            libres.setTextColor(0xf44336); //Red
+        }
+        if (freeParks < 20){
+            libres.setTextColor(0xfdd835);//Yellow
+        } else {
+//                    #64dd17
+//                    libres.setTextColor(Resources.getSystem().getColor(R.color.colorOk)); //No funciona
+            libres.setTextColor(0x64dd17);//Green
+        }
+
 
         return view;
     }

@@ -7,4 +7,6 @@
     <string name="maps">Mapa</string>
     <string name="load">Actualizar</string>
     <string name="near">Cercano</string>
+    <string name="no_data">Sin datos</string>
+    <string name="full">Lleno</string>
 </resources>

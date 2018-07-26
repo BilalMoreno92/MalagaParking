@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.opencsv.CSVReader;
 
@@ -16,6 +18,19 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    //Data position in CSV file.
+    private final int ID = 0;
+    private final int NAME = 1;
+    private final int ADRESS = 2;
+    private final int LATITUDE = 5;
+    private final int LONGITUDE = 6;
+    private final int CAPACITY = 8;
+    private final int LAST_UPDATE = 10;
+    private final int FREE_PARKS = 11;
+
+    TextView lastUpdate;
+
     ArrayList<Parking> list_parking = new ArrayList<>();
     private  URL url;
 
@@ -23,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        lastUpdate = findViewById(R.id.txtUltimaAct);
 
         try {
             url = new URL("http://datosabiertos.malaga.eu/recursos/aparcamientos/ocupappublicosmun/ocupappublicosmun.csv");
@@ -43,13 +60,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.btLoad:
-                new DownloadData().execute(url);
+                loadParking();
                 break;
         }
     }
 
     private void loadParking(){
 
+        new DownloadData().execute(url);
 //        Parking salitre = new Parking(1,"Salitre");
 //        Parking cervantes = new Parking(2,"Cervantes");
 //        Parking elpalo = new Parking(3,"El Palo");
@@ -84,27 +102,43 @@ public class MainActivity extends AppCompatActivity {
 //        list_parking.add(alcazaba);
     }
 
-    private class DownloadData extends AsyncTask<URL, Integer, Long> {
+    private class DownloadData extends AsyncTask<URL, Void, String> {
 
         @Override
-        protected Long doInBackground(URL... urls) {
+        protected String doInBackground(URL... urls) {
+            CSVReader reader;
+            BufferedReader input = null;
+            Parking parking = null;
             try {
-                BufferedReader input = new BufferedReader(new InputStreamReader(url.openStream()));
-                CSVReader reader = new CSVReader(input);
+                input = new BufferedReader(new InputStreamReader(url.openStream()));
+                reader = new CSVReader(input);
+                String[] line = reader.readNext();
+                list_parking = new ArrayList<>();
+                while ((line = reader.readNext()) != null) {
+                    try {
+
+                        parking = new Parking(Integer.parseInt(line[ID]), line[NAME]);
+                        parking.setDir(line[ADRESS]);
+                        parking.setLatitude(Double.parseDouble(line[LATITUDE]));
+                        parking.setLongitude(Double.parseDouble(line[LONGITUDE]));
+                        parking.setCapacidad(Integer.parseInt(line[CAPACITY]));
+                        parking.setLibres(Integer.parseInt(line[FREE_PARKS]));
+                        parking.setFechaAct(line[LAST_UPDATE]);
+                        Log.d("DownloadedData", parking.toString());
+                        list_parking.add(parking);
+                    } catch (NumberFormatException e){
+                        Log.e("IncompleteData", parking.toString());
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return list_parking.get(0).getFechaAct();
         }
 
         @Override
-        protected void onPostExecute(Long aLong) {
-            super.onPostExecute(aLong);
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
+        protected void onPostExecute(String s) {
+            lastUpdate.setText(s);
         }
     }
 }
